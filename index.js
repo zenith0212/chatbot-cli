@@ -1,14 +1,26 @@
 const dotenv = require('dotenv');
 dotenv.config();
-const { Configuration, OpenAIApi } = require("openai");
-const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
+
+const { Configuration, OpenAIApi } = require('openai');
+const readline = require('readline');
+
+const openAi = new OpenAIApi(
+    new Configuration({
+        apiKey: process.env.OPENAI_API_KEY,
+    })
+);
+
+const userInterface = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
 });
-const openai = new OpenAIApi(configuration);
-(async () => {
-    const completion = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: "Can you write a simple python code?",
+
+userInterface.prompt();
+userInterface.on('line', async (input) => {
+    const response = await openAi.createChatCompletion({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: input }],
     });
-    console.log(completion.data.choices[0].text);
-})();
+    console.log(response.data.choices[0].message.content);
+    userInterface.prompt();
+})
